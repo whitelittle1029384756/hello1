@@ -10,3 +10,4 @@ java2 update
 branch test
  java2
 update by white 
+remote java2
