@@ -1,0 +1,10 @@
+
+linux 
+shell
+hadoop
+Zookeeper
+hive
+HA
+Flume
+kafka
+hbase

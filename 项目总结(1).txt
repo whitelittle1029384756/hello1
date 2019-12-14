@@ -1,0 +1,44 @@
+阿里云 CDH 5.16.2（2019年）
+
+数仓部分
+     1.flume  hdfs sink 参数配置，ods层数据肯定是行式存储，parquet压缩。 lzo压缩支持切片，但是默认不支持，必须加索引。单切片情况下是parquet速度更快。
+     2.dwd层 数据清洗 脱敏规则 。Spark Api  insertinto saveastable  (saveastable不兼容hive,insertinto 兼容hive)。 减少文件个数的方式。
+     3.维度降维， 课程维度  试卷维度 做题维度  章节维度 科目维度 。 join    dataframe dataset 两种join方式  1、====   2、seq集合
+            rdd  dataframe  dataset三者的一个区别 优点 缺点 转换,   转换时 需要加隐式转换 todf  as
+     4.宽表  宽表字段。 量多 。    
+     5.拉链表  针对哪些字段去做拉链  用户id vip等级  金额去做拉链。 一天拉链一次。 overwrite全量刷新的方式
+             hive事物表支持修改的功能 从0.14开始支持。   必须是内部表  分桶   才可以使用事物表
+     6.指标分析   有哪些指标  top3用户支付金额的排名  用户注册人数的count     各分段用户id数   错题率   试卷的平均分平均耗时 最高分最低分
+         开窗函数  排序函数  
+      api使用的话 首先需要导报   org.apache.spark.sql.funtions
+      7. datax 需要配置高可用  
+       datax跟sqoop的区别   sqoop原理是mr所以它是分布式的  默认开启4个mr     datax单节点的，sqoop不支持压缩的  datax支持压缩的
+     8. （1）广播join 适用于小表join大表  （2）kryo序列化   rdd使用的时候需要取注册case class ,还要修改spark 序列方式 ，大量较少 shuffle的数据量
+          （3）df ds默认支持kryo序列化的    （4）内存的一个优化 序列化缓存 。 rdd默认缓存级别和df ds是不一样的
+        (5)小表join大表优化  采用广播join   将大表的key打散小表进行一个扩容    （6）大表join大笔  SMB join  分桶列==排序列==join列 两张表分桶数需要相等
+        (7)调优reduce端到map拉取次数默认大小 48MB 会调整96MB  （8）shuffle写的临时文件大小 32k  64k
+        第7点第8点两个调优 效果5%左右
+
+实时部分
+    1.spark streaming 
+    2.直连方式  spark1.3出来的
+    3.updatestatebykey  基于checkpoint   checkpoint它是将状态数据保存在hdfs中 会造成大量的小文件 所以生产是不会使用的包括（rdd,df,ds的checkpoint）   
+    4.reducebykeyandwindow  参数 窗口大小 和 滑动步长必须是批次时间的倍数
+    5.如何保证spark streaming第一次启动时候不丢失数据  earlist
+    6.偏移量提交方式   
+             （1）自动提交  获取到数据后立马将偏移量提交了会造成偏移量提交了，处理业务报错了 那么造成数据丢失的情况
+  ******   （2）手动提交偏移量，处理完业务后再去提交偏移量    topic groupid partition offset
+ ***7.（1）控制spark streaming去kafka拉取的消费速度 控制每个分区没秒钟最大拉取的数据量 （2）背压机制 根据延迟动态拉取数据  （3）优雅关闭spark streaming
+    8.业务指标 学员做题的一个正确率和知识点掌握度   售课的页面跳转率   课时播放时长
+
+
+
+
+
+
+
+
+
+
+
+
